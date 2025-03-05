@@ -1,6 +1,7 @@
-import { Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
+import { JwtCustomerGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -11,7 +12,6 @@ export class AuthController {
     @Post('customer/login')
     async login(@Req() req, @Res() res) {
         try {
-            console.log("-=-=-=-=-=-req.user-=-=-", req.user);
             const token = await this.authService.generateJwt(req.user);
             res.cookie('scrapify_', token, {
                 httpOnly: true, // Prevents JavaScript access (Secure)
@@ -21,9 +21,7 @@ export class AuthController {
             });
             return res.status(200).json({ message: "Login successful", });
         } catch (error) {
-
             console.log("--=--==-=-=error-=-==--=", error);
-
             return res.status(400).json({ message: error.message });
         }
     }
@@ -49,6 +47,15 @@ export class AuthController {
         try {
             const verified = await this.authService.verifyOtp(req.body);
             return res.status(200).json(verified);
+        } catch (error) {
+            return res.status(400).json({ message: error.message });
+        }
+    }
+    @UseGuards(JwtCustomerGuard)
+    @Get('profile')
+    async getProfile(@Req() req, @Res() res) {
+        try {
+            return res.status(200).json({ message: 'Profile fetched successfully', user: req.auth });
         } catch (error) {
             return res.status(400).json({ message: error.message });
         }
