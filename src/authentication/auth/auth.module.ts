@@ -10,7 +10,7 @@ import { JwtStrategy } from './jwt.strategy';
 @Module({
   imports: [CustomerModule, PassportModule,
     JwtModule.register({
-      secret: process.env.JWT_SECRET,
+      secret: process.env.JWT_SECRET || "123456789dsdsd",
       signOptions: { expiresIn: "10h" }
 
     })
@@ -18,4 +18,9 @@ import { JwtStrategy } from './jwt.strategy';
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, JwtStrategy],
 })
-export class AuthModule { }
+export class AuthModule {
+  constructor() {
+    console.log("-=--=-JWT_SECRET-=-=-=-", process.env.JWT_SECRET);
+
+  }
+}
